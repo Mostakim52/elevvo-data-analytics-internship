@@ -1,0 +1,15 @@
+relationship rel_Fact_Date
+	fromColumn: FactSales.DateKey
+	toColumn: DimDate.DateKey
+
+relationship rel_Fact_Product
+	fromColumn: FactSales.ProductKey
+	toColumn: DimProduct.ProductKey
+
+relationship rel_Fact_Customer
+	fromColumn: FactSales.CustomerKey
+	toColumn: DimCustomer.CustomerKey
+
+relationship rel_Fact_Geo
+	fromColumn: FactSales.GeoKey
+	toColumn: DimGeography.GeoKey

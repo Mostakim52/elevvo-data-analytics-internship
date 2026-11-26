@@ -1,0 +1,30 @@
+# Power BI user-local state
+**/.pbi/
+
+# Raw datasets (~215 MB, public sources are listed in the README)
+datasets/
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Local agent tooling state
+.commandcode/
+
+# Submission build artefacts (the staged copy duplicates the task folders;
+# the zips exist only as an email fallback)
+submission/*.zip
+submission/Elevvo_Data_Analytics_Submission_Mostakim_Hossain/
+
+# Internal submission prep notes — not part of the deliverable
+submission/SUBMISSION_GUIDE.md
+submission/LINKEDIN_POST.md
+submission/EMAIL_FOLLOWUP.md
+
+# Scraping cache
+task_06/raw/
+
+# 31 MB star-schema DB: rebuilt by the Task 9 notebook; its binary trips GitHub
+# push protection (false positive), so this mirror omits it.
+task_09/olist_star.sqlite

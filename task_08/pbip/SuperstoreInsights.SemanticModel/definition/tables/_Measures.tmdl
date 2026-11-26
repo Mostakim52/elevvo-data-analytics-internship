@@ -1,0 +1,109 @@
+table _Measures
+	lineageTag: 5a7eb9cd-106c-4169-8a42-08aa2a72f7b8
+
+	column Value
+		dataType: int64
+		isHidden
+		sourceColumn: [Value]
+		summarizeBy: none
+		lineageTag: 219798bc-74cd-49c5-9c8a-aae36861ec33
+
+	measure 'Total Revenue' = SUM ( FactSales[Sales] )
+		formatString: \$#,0.00
+		lineageTag: 21c94e44-42c5-4051-8d88-d4e23472441b
+
+	measure 'Total Profit' = SUM ( FactSales[Profit] )
+		formatString: \$#,0.00
+		lineageTag: 48c6f8e7-8f9a-4862-85a6-6a1e049a795e
+
+	measure 'Units Sold' = SUM ( FactSales[Quantity] )
+		formatString: \#,##0
+		lineageTag: a8237782-e0f3-4c7b-9c6c-423e8a3659db
+
+	measure 'Orders' = DISTINCTCOUNT ( FactSales[OrderID] )
+		formatString: \#,##0
+		lineageTag: 1d59622c-03e6-49a4-bb5a-de0c3f6a8c5a
+
+	measure 'Profit Margin' = DIVIDE ( [Total Profit], [Total Revenue] )
+		formatString: 0.0%
+		lineageTag: 75761dd1-42ce-4463-990b-394815af95e7
+
+	measure 'Average Order Value' = DIVIDE ( [Total Revenue], [Orders] )
+		formatString: \$#,0.00
+		lineageTag: 8097c232-fdb6-4e66-a0c3-1541f5da9d96
+
+	measure 'Average Discount' = AVERAGE ( FactSales[Discount] )
+		formatString: 0.0%
+		lineageTag: 051c19f6-29bf-4070-b266-897ea9f1144c
+
+	measure 'Avg Ship Days' = AVERAGE ( FactSales[ShipDays] )
+		formatString: 0.0
+		lineageTag: 3ca3253e-8e2f-41fd-b11a-1a7757c8a9de
+
+	measure 'Revenue LY' = CALCULATE ( [Total Revenue], SAMEPERIODLASTYEAR ( DimDate[Date] ) )
+		formatString: \$#,0.00
+		lineageTag: 82e05860-8275-4a45-a5f4-56fa07186e17
+
+	measure 'YoY Growth' = DIVIDE ( [Total Revenue] - [Revenue LY], [Revenue LY] )
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: 9c9e64b1-482e-485e-ac19-346e65101c6d
+
+	measure 'Revenue PM' = CALCULATE ( [Total Revenue], DATEADD ( DimDate[Date], -1, MONTH ) )
+		formatString: \$#,0.00
+		lineageTag: a8ad4c16-d840-49ef-bdf2-5d27a7c836ed
+
+	measure 'MoM Growth' = DIVIDE ( [Total Revenue] - [Revenue PM], [Revenue PM] )
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: 5c01faa2-09de-462e-a33c-7fd21239b440
+
+	measure 'Revenue YTD' = TOTALYTD ( [Total Revenue], DimDate[Date] )
+		formatString: \$#,0.00
+		lineageTag: 53834c04-90cf-436d-ab0f-f50f0de695e5
+
+	measure 'Product Revenue Rank' = RANKX ( ALLSELECTED ( DimProduct[ProductName] ), [Total Revenue], , DESC )
+		formatString: \#,##0
+		lineageTag: 2a4e6404-a0b6-4269-b7a6-4521df2e3f39
+
+	measure 'Revenue of Top 10 Products' = CALCULATE ( [Total Revenue], KEEPFILTERS ( TOPN ( 10, ALLSELECTED ( DimProduct[ProductName] ), [Total Revenue], DESC ) ) )
+		formatString: \$#,0.00
+		lineageTag: 80133ae5-e150-4a58-a57c-9b2fa23389fa
+
+	measure 'Top 10 Share of Revenue' = DIVIDE ( [Revenue of Top 10 Products], CALCULATE ( [Total Revenue], ALLSELECTED ( DimProduct[ProductName] ) ) )
+		formatString: 0.0%
+		lineageTag: cddccab7-ff54-4290-adab-a4c450324adf
+
+	measure 'YoY Growth Last Year' = VAR y = CALCULATE ( MAX ( DimDate[Year] ), ALL ( DimDate ) ) VAR cur = CALCULATE ( [Total Revenue], DimDate[Year] = y ) VAR prev = CALCULATE ( [Total Revenue], DimDate[Year] = y - 1 ) RETURN DIVIDE ( cur - prev, prev )
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: 5b0c09f1-59dd-4c39-8044-3dd8adc40d80
+
+	measure 'Top Product Revenue' = SUM ( TopProducts[Revenue] )
+		formatString: \$#,0.00
+		lineageTag: 357d9f80-1e6d-4e77-b7ec-f7138fec0a03
+
+	measure 'Customers' = DISTINCTCOUNT ( FactSales[CustomerKey] )
+		formatString: \#,##0
+		lineageTag: 942fe908-8dd4-4ef6-a3bd-741f6ec1f3b5
+
+	measure 'Revenue per Customer' = DIVIDE ( [Total Revenue], [Customers] )
+		formatString: \$#,0.00
+		lineageTag: 6a3b4a61-04b5-4102-9905-c68f7b19378b
+
+	measure 'Region Revenue Rank' = RANKX ( ALLSELECTED ( DimGeography[Region] ), [Total Revenue], , DESC )
+		formatString: \#,##0
+		lineageTag: c26a34e6-82db-4cdb-998d-67d121742ff1
+
+	measure 'Best Region' = CALCULATE ( SELECTEDVALUE ( DimGeography[Region] ), TOPN ( 1, ALL ( DimGeography[Region] ), [Total Revenue], DESC ) )
+		lineageTag: 4acde2ae-54a5-4bd2-a1bf-8dd9b18f2712
+
+	measure 'Revenue Colour' = SWITCH ( TRUE (), [YoY Growth] >= 0.1, "#2E7D32", [YoY Growth] >= 0, "#F2A900", "#C0392B" )
+		lineageTag: 1a06894d-fa37-49b5-b1c3-5a3a0fda1bde
+
+	measure 'Margin Warning' = IF ( [Profit Margin] < 0.05, "Below 5% margin", "Healthy" )
+		lineageTag: f7cb7750-51e5-4626-89d7-b3613d79e524
+
+	measure 'Report Title' = "Superstore Retail Insights — " & FORMAT ( MIN ( DimDate[Date] ), "mmm yyyy" ) & " to " & FORMAT ( MAX ( DimDate[Date] ), "mmm yyyy" ) & "  |  Revenue " & FORMAT ( [Total Revenue], "$#,##0" )
+		lineageTag: 29e67172-99f1-4a60-9c3b-7e4dcddfcb65
+
+	partition _Measures = calculated
+		mode: import
+		source = {1}

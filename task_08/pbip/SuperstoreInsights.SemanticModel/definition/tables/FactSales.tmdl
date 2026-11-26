@@ -1,0 +1,89 @@
+table FactSales
+	lineageTag: 2f733507-74c5-41bd-a859-292c33dfc69c
+
+	column OrderID
+		dataType: string
+		summarizeBy: none
+		lineageTag: d5b031af-4c39-4daa-8f38-cc5dd6f0b1b3
+
+	column DateKey
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: e5d96028-8e59-4685-9de6-aa91ea29487b
+
+	column ProductKey
+		dataType: string
+		summarizeBy: none
+		lineageTag: 8dc36a87-a135-416c-b45d-c0075e37fee2
+
+	column CustomerKey
+		dataType: string
+		summarizeBy: none
+		lineageTag: b776282c-c491-4a4e-82f9-9bd229f20b21
+
+	column GeoKey
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: 7aa05abb-3164-497a-b43f-e213d025d9e5
+
+	column ShipMode
+		dataType: string
+		summarizeBy: none
+		lineageTag: f26112f1-dc54-4030-b9c3-42870da12fd4
+
+	column Sales
+		dataType: double
+		formatString: \$#,0.00
+		summarizeBy: sum
+		lineageTag: 96a9d1da-229d-44bb-a665-5b7137263204
+
+	column Quantity
+		dataType: int64
+		formatString: \#,##0
+		summarizeBy: sum
+		lineageTag: 89f31066-2366-4a3d-8dda-79bda933b1ab
+
+	column Discount
+		dataType: double
+		formatString: 0.0%
+		summarizeBy: none
+		lineageTag: 66f885fa-7940-40c7-a8a5-84d57f3332d4
+
+	column Profit
+		dataType: double
+		formatString: \$#,0.00
+		summarizeBy: sum
+		lineageTag: 1e72d589-a7ba-4fe4-88fd-daa0e76144d9
+
+	column ShipDays
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: c201cc6a-86cc-49b8-b629-bc7466b65a57
+
+	partition FactSales = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("H:\Repos\elevvo-internship-data-analytics\untitled-project\task_08\model\FactSales.csv"),[Delimiter=",", Columns=11, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Selected = Table.SelectColumns(Promoted, {"OrderID", "DateKey", "ProductKey", "CustomerKey", "GeoKey", "ShipMode", "Sales", "Quantity", "Discount", "Profit", "ShipDays"}),
+				    Typed = Table.TransformColumnTypes(Selected, {
+				                {"OrderID", type text},
+				                {"DateKey", Int64.Type},
+				                {"ProductKey", type text},
+				                {"CustomerKey", type text},
+				                {"GeoKey", Int64.Type},
+				                {"ShipMode", type text},
+				                {"Sales", Double.Type},
+				                {"Quantity", Int64.Type},
+				                {"Discount", Double.Type},
+				                {"Profit", Double.Type},
+				                {"ShipDays", Int64.Type}
+				            })
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

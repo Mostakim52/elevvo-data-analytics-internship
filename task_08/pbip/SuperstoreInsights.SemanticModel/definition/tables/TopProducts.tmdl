@@ -1,0 +1,29 @@
+table TopProducts
+	lineageTag: 8eb4a843-eec0-4e30-94d8-cbd933828c45
+
+	column ProductName
+		dataType: string
+		summarizeBy: none
+		lineageTag: 49fdd25f-705f-442f-b86e-7c35228b2978
+
+	column Revenue
+		dataType: double
+		formatString: \$#,0.00
+		summarizeBy: sum
+		lineageTag: de40857e-befe-4482-817b-8fb3136c96ba
+
+	partition TopProducts = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("H:\Repos\elevvo-internship-data-analytics\untitled-project\task_08\model\TopProducts.csv"),[Delimiter=",", Columns=2, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Selected = Table.SelectColumns(Promoted, {"ProductName", "Revenue"}),
+				    Typed = Table.TransformColumnTypes(Selected, {
+				                {"ProductName", type text},
+				                {"Revenue", Double.Type}
+				            })
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,40 @@
+table DimProduct
+	lineageTag: 047b6a3f-936f-4798-bea1-8bd813bdd7cf
+
+	column ProductKey
+		dataType: string
+		summarizeBy: none
+		lineageTag: 4dedd8ae-d0a0-4d70-9ae0-5c427e5300ad
+
+	column Category
+		dataType: string
+		summarizeBy: none
+		lineageTag: 5ace9bb1-2050-4536-98c3-309201144927
+
+	column SubCategory
+		dataType: string
+		summarizeBy: none
+		lineageTag: 66320028-3f75-4f00-ba62-1423befae9c9
+
+	column ProductName
+		dataType: string
+		summarizeBy: none
+		lineageTag: 4cbfc2d1-90f8-4047-9809-93a1f7348658
+
+	partition DimProduct = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("H:\Repos\elevvo-internship-data-analytics\untitled-project\task_08\model\DimProduct.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Selected = Table.SelectColumns(Promoted, {"ProductKey", "Category", "SubCategory", "ProductName"}),
+				    Typed = Table.TransformColumnTypes(Selected, {
+				                {"ProductKey", type text},
+				                {"Category", type text},
+				                {"SubCategory", type text},
+				                {"ProductName", type text}
+				            })
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

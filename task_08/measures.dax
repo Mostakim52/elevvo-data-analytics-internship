@@ -1,0 +1,101 @@
+/* =====================================================================
+   Task 8 - Superstore Retail Insights
+   DAX measure library for the star schema in model/
+
+   Model:
+     FactSales[DateKey]     -> DimDate[DateKey]
+     FactSales[ProductKey]  -> DimProduct[ProductKey]
+     FactSales[CustomerKey] -> DimCustomer[CustomerKey]
+     FactSales[GeoKey]      -> DimGeography[GeoKey]
+   All relationships: many-to-one, single direction, active.
+
+   Create a dedicated measure table (Home > Enter Data > name it "_Measures")
+   and paste these in; keeping measures out of FactSales keeps the field list tidy.
+   ===================================================================== */
+
+/* ---- core measures ------------------------------------------------- */
+
+Total Revenue = SUM ( FactSales[Sales] )
+
+Total Profit = SUM ( FactSales[Profit] )
+
+Units Sold = SUM ( FactSales[Quantity] )
+
+Orders =
+DISTINCTCOUNT ( FactSales[OrderID] )
+
+Profit Margin =
+DIVIDE ( [Total Profit], [Total Revenue] )
+
+Average Order Value =
+DIVIDE ( [Total Revenue], [Orders] )
+
+Average Discount =
+AVERAGE ( FactSales[Discount] )
+
+Avg Ship Days =
+AVERAGE ( FactSales[ShipDays] )
+
+/* ---- growth -------------------------------------------------------- */
+
+Revenue LY =
+CALCULATE ( [Total Revenue], SAMEPERIODLASTYEAR ( DimDate[Date] ) )
+
+YoY Growth =
+DIVIDE ( [Total Revenue] - [Revenue LY], [Revenue LY] )
+
+Revenue PM =
+CALCULATE ( [Total Revenue], DATEADD ( DimDate[Date], -1, MONTH ) )
+
+MoM Growth =
+DIVIDE ( [Total Revenue] - [Revenue PM], [Revenue PM] )
+
+Revenue YTD =
+TOTALYTD ( [Total Revenue], DimDate[Date] )
+
+/* ---- ranking / product insight ------------------------------------- */
+
+Product Revenue Rank =
+RANKX ( ALLSELECTED ( DimProduct[ProductName] ), [Total Revenue], , DESC )
+
+Revenue of Top 10 Products =
+CALCULATE (
+    [Total Revenue],
+    KEEPFILTERS ( TOPN ( 10, ALLSELECTED ( DimProduct[ProductName] ), [Total Revenue], DESC ) )
+)
+
+Top 10 Share of Revenue =
+DIVIDE ( [Revenue of Top 10 Products], CALCULATE ( [Total Revenue], ALLSELECTED ( DimProduct[ProductName] ) ) )
+
+/* ---- customer / region --------------------------------------------- */
+
+Customers =
+DISTINCTCOUNT ( FactSales[CustomerKey] )
+
+Revenue per Customer =
+DIVIDE ( [Total Revenue], [Customers] )
+
+Region Revenue Rank =
+RANKX ( ALLSELECTED ( DimGeography[Region] ), [Total Revenue], , DESC )
+
+Best Region =
+CALCULATE (
+    SELECTEDVALUE ( DimGeography[Region] ),
+    TOPN ( 1, ALL ( DimGeography[Region] ), [Total Revenue], DESC )
+)
+
+/* ---- conditional formatting helpers --------------------------------- */
+
+Revenue Colour =
+SWITCH ( TRUE (), [YoY Growth] >= 0.1, "#2E7D32", [YoY Growth] >= 0, "#F2A900", "#C0392B" )
+
+Margin Warning =
+IF ( [Profit Margin] < 0.05, "Below 5% margin", "Healthy" )
+
+/* ---- dynamic title -------------------------------------------------- */
+
+Report Title =
+"Superstore Retail Insights — " &
+FORMAT ( MIN ( DimDate[Date] ), "mmm yyyy" ) & " to " &
+FORMAT ( MAX ( DimDate[Date] ), "mmm yyyy" ) &
+"  |  Revenue " & FORMAT ( [Total Revenue], "$#,##0" )

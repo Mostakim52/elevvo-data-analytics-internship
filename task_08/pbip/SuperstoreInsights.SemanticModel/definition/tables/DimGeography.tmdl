@@ -1,0 +1,54 @@
+table DimGeography
+	lineageTag: 15cc2c30-f569-458c-a345-80205103b760
+
+	column GeoKey
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: d2c54710-5687-498d-b6d1-2cf1136fdc29
+
+	column Country
+		dataType: string
+		summarizeBy: none
+		lineageTag: 511de165-cdb2-4d76-aada-31f114f0500f
+
+	column Region
+		dataType: string
+		summarizeBy: none
+		lineageTag: 403cfed7-6d62-4327-a2e9-879d50124810
+
+	column State
+		dataType: string
+		summarizeBy: none
+		lineageTag: 64914ad2-a1e6-4246-92f9-f6c031d13e14
+
+	column City
+		dataType: string
+		summarizeBy: none
+		lineageTag: bd27866d-86d9-4ccc-83a2-b141bd8ee1f8
+
+	column PostalCode
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: 349d0234-f896-4625-a21e-b03357da1945
+
+	partition DimGeography = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("H:\Repos\elevvo-internship-data-analytics\untitled-project\task_08\model\DimGeography.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Selected = Table.SelectColumns(Promoted, {"GeoKey", "Country", "Region", "State", "City", "PostalCode"}),
+				    Typed = Table.TransformColumnTypes(Selected, {
+				                {"GeoKey", Int64.Type},
+				                {"Country", type text},
+				                {"Region", type text},
+				                {"State", type text},
+				                {"City", type text},
+				                {"PostalCode", Int64.Type}
+				            })
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

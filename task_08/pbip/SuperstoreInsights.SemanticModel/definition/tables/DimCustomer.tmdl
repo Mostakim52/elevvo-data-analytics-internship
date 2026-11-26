@@ -1,0 +1,34 @@
+table DimCustomer
+	lineageTag: 2b7023b8-11d0-4a40-9a0b-29a595a1711b
+
+	column CustomerKey
+		dataType: string
+		summarizeBy: none
+		lineageTag: 1a0c7ac0-ba7f-47dd-82ef-161be2378246
+
+	column CustomerName
+		dataType: string
+		summarizeBy: none
+		lineageTag: 526ac824-f6d9-4a3f-8423-2ca6dd43bc88
+
+	column Segment
+		dataType: string
+		summarizeBy: none
+		lineageTag: 7fbaab47-7fe7-4152-a069-26cfa71adbe7
+
+	partition DimCustomer = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("H:\Repos\elevvo-internship-data-analytics\untitled-project\task_08\model\DimCustomer.csv"),[Delimiter=",", Columns=3, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Selected = Table.SelectColumns(Promoted, {"CustomerKey", "CustomerName", "Segment"}),
+				    Typed = Table.TransformColumnTypes(Selected, {
+				                {"CustomerKey", type text},
+				                {"CustomerName", type text},
+				                {"Segment", type text}
+				            })
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

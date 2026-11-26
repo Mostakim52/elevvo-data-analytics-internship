@@ -1,0 +1,70 @@
+table DimDate
+	dataCategory: Time
+	lineageTag: ad630ce7-b5af-4345-a81f-b48c849dad60
+
+	column DateKey
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: 491351a8-7251-4839-8910-51cfeb53fc1e
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		lineageTag: 60a4b80e-fd27-472b-9343-7b25b6fef0eb
+
+	column Year
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: 31f45d55-5a85-4851-aa38-c5ef48eed028
+
+	column Quarter
+		dataType: string
+		summarizeBy: none
+		lineageTag: 170ae0ce-bc53-4485-8782-ee4fc61e31c6
+
+	column Month
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		lineageTag: cf0d7f6c-614b-4eb8-b611-ac0ce56df36f
+
+	column MonthName
+		dataType: string
+		summarizeBy: none
+		lineageTag: 5ba745b0-f495-4318-a1f5-d28967efaaf1
+
+	column YearMonth
+		dataType: string
+		summarizeBy: none
+		lineageTag: b1e9f318-e10b-45c8-a1f8-6a39afcc3ce8
+
+	column Weekday
+		dataType: string
+		summarizeBy: none
+		lineageTag: f20be149-0297-4b6e-b305-afe1635b08ea
+
+	partition DimDate = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("H:\Repos\elevvo-internship-data-analytics\untitled-project\task_08\model\DimDate.csv"),[Delimiter=",", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Selected = Table.SelectColumns(Promoted, {"DateKey", "Date", "Year", "Quarter", "Month", "MonthName", "YearMonth", "Weekday"}),
+				    Typed = Table.TransformColumnTypes(Selected, {
+				                {"DateKey", Int64.Type},
+				                {"Date", type date},
+				                {"Year", Int64.Type},
+				                {"Quarter", type text},
+				                {"Month", Int64.Type},
+				                {"MonthName", type text},
+				                {"YearMonth", type text},
+				                {"Weekday", type text}
+				            })
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
